@@ -1,12 +1,12 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-typedef unsigned long long U64;
+typedef unsigned long long U64; // 64 bit number because it's 8x8 board
 
 #define NAME "Vice 1.0"
-#define BRD_SQ_NUM 120
+#define BRD_SQ_NUM (120)
 
-// piece declaration
+#define MAX_GAME_MOVES (2048)
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 
 // board coordinate declaration
@@ -29,5 +29,52 @@ enum {
 };
 
 enum { FALSE, TRUE };
+
+#endif
+
+// castling (1 2 4 8 changes each bits)
+enum { WKCA = 1, WQKA = 2, BKCA = 4, BQCA = 8 };
+
+// structure keeping track of match history in case of undo
+// BEFORE the move was made
+typedef struct {
+
+  int move; // played move
+  int castlePerm;
+  int enPas;
+  int fiftyMove;
+  U64 posKey;
+
+} S_UNDO;
+
+// structure keeping track of board status
+typedef struct {
+
+  int pieces[BRD_SQ_NUM];
+  // call in 64 bit, set 1 on the coordinate where pawn is.
+  U64 pawns[3]; // 3 bit because Black, White, or Both
+
+  // keep in track of where the king is
+  int KingSq[2]; // 2 bit because it's either Black or White
+
+  int side; // current side to move
+  int enPas; // en passante
+  int fiftyMove; // game drawn when 50 moves
+
+  int ply; // number of half moves
+  int hisPly; // total half moves (history)
+
+  int castlePerm; // permission for castling
+
+  U64 posKey; // Unique position key
+
+  int pceNum[13]; // number of pieces including EMPTY
+  int bigPce[3]; // pieces that aren't pawns
+  int majPce[3]; // Rooks and Queens
+  int minPce[3]; // Bishop and Knights
+
+  S_UNDO history[MAX_GAME_MOVES];
+
+} S_BOARD;
 
 #endif
